@@ -14,7 +14,7 @@ class NuclearSimWasm {
         this.onStateChange = null;
     }
 
-    async init(wasmUrl = "/nuclear-sim.wasm") {
+    async init(wasmUrl = "nuclear-sim.wasm") {
         const importObj = {
             teavm: {
                 currentTimeMillis: () => Date.now(),
@@ -110,31 +110,31 @@ class NuclearSimWasm {
         if (this.onStateChange) this.onStateChange(this.getState());
     }
 
-    setTile(x, y, type) {
+    setTile(x, y, type, notify = true) {
         this.inst.exports.setTile(x, y, this.createJavaString(type));
-        if (this.onStateChange) this.onStateChange(this.getState());
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
     }
 
-    setPipeTier(tier) {
+    setPipeTier(tier, notify = true) {
         this.inst.exports.setPipeTier(tier);
-        if (this.onStateChange) this.onStateChange(this.getState());
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
     }
 
-    setTurbine(material, size, fitting) {
+    setTurbine(material, size, fitting, notify = true) {
         this.inst.exports.setTurbine(
             this.createJavaString(material),
             this.createJavaString(size),
             this.createJavaString(fitting)
         );
-        if (this.onStateChange) this.onStateChange(this.getState());
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
     }
 
-    setParam(key, value) {
+    setParam(key, value, notify = true) {
         this.inst.exports.setParam(
             this.createJavaString(key),
             this.createJavaString(String(value))
         );
-        if (this.onStateChange) this.onStateChange(this.getState());
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
     }
 
     setRunning(run) {
