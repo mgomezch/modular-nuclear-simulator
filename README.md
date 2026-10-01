@@ -1,52 +1,9 @@
-# Modular Pressure Tube Reactor (MPTR) Simulator
+# Modular Pressure Tube Reactor (MPTR) simulator
 
-An interactive, browser-based WebAssembly reactor simulator for the **Modular Nuclear** mod.
+**Live app**: [https://mgomezch.github.io/modular-nuclear-simulator/](https://mgomezch.github.io/modular-nuclear-simulator/)
 
-🔗 **Live Simulation Webapp**: [https://mgomezch.github.io/modular-nuclear-simulator/](https://mgomezch.github.io/modular-nuclear-simulator/)
+This is a small Web app that I'm using to test out game balance for a personal project: an adaptation of the Modern Industrialization nuclear reactor to run inside of GTNH.  The mod isn't public yet, and it may never be part of GTNH anyway since Nuclear Horizons, a new nuclear-reactor mod currently being cooked by GTNH developers, is apparently almost ready, so I'm late to the party.  And more importantly: I'm making this mod (and this whole app!) fully 100% through vibecoding with Antigravity, since I need to learn how to use it anyway for work.
 
----
+To be clear: I haven't looked at a single line of code in this app; it all comes from Antigravity.  As a longtime software engineer, I have complicated / weird feelings about this.  But anyway, that whole can of worms aside, here it is.  Play with it, it's fun.  If you're interested, hit me up (mgomezch in GTNH Discord) and I can share the actual mod, which works as an add-on to GTNH 2.9 (tested on some daily shortly after release candidate 1).  It's unfinished, and completely unbalanced, but it's kinda fun to mess with anyway.  It does require a small change to GTNH GT5 since I added Compressor recipes that produce fluids, but otherwise it's stand-alone.
 
-## Overview
-
-The MPTR Simulator models complex multi-chamber nuclear reactor physics, fluid dynamics, and turbine power generation entirely client-side in your web browser. 
-
-The core simulation engine is transpiled from Java bytecode directly to **WebAssembly (WASM)**, providing exact physical parity with in-game calculations at simulation speeds exceeding 2,000 ticks/sec with 0ms network latency.
-
----
-
-## Features
-
-- **Real-Time Thermodynamics & Heat Transfer**:
-  - Inter-tile thermal conduction, convection, and chamber heat dissipation.
-  - Active coolant boiling for Distilled Water, High-Pressure Distilled Water, Heavy Water, and IC2 Coolant.
-  - Boiling curve turnover kinetics with heat transfer and boiled dry safety states.
-
-- **Neutron Kinetics & Transmutation**:
-  - Individual fast and thermal neutron tracking per chamber tile.
-  - Directional neutron scattering, moderator deceleration, and beryllium/carbon reflection.
-  - Control rod neutron absorption and nuclear fuel breeding (including Tritium and Deuterium breeding).
-  - Radiovoltaic cell direct energy generation from neutron capture.
-
-- **Interactive Chamber Designer & Palette**:
-  - Full tile palette with all nuclear fuels (Thorium, Uranium, MOX, Naquadah, Naquadria, Tiberium, and exotic rods).
-  - Coolant hatches, heat vents, heat exchangers, and reflector components.
-  - Live tile inspection detailing temperature, flux densities, and fluid turnover.
-
-- **Power Estimation Pipeline**:
-  - Multi-stage turbine power calculations for regular steam, superheated steam, and supercritical steam.
-  - Large Steam Turbine (LST) and Extreme Large Steam Turbine (XLST) models with customizable rotor materials and sizing.
-  - Cascading multi-stage heat exchanger modeling.
-
-- **Four Display Modes**:
-  - 🌡️ **Temperature Heatmap**
-  - ⚛️ **Total Neutron Flux**
-  - ⚡ **Fast Neutron Flux**
-  - 🟢 **Thermal Neutron Flux**
-
----
-
-## Technical Details
-
-- **Engine**: Transpiled from Java bytecode using TeaVM to standalone WebAssembly.
-- **Runtime**: Client-side WebAssembly with zero backend dependencies.
-- **Hosting**: GitHub Pages.
+License: GPL3, because I originally started the project as a bunch of modifications to GTNH's GT5-Unofficial repo, and this app has stuff extracted from that project, so its license holds.  See https://github.com/GTNewHorizons/GT5-Unofficial/blob/master/LICENSE.txt
