@@ -87,12 +87,20 @@ class NuclearSimWasm {
 
     step() {
         this.inst.exports.step();
-        if (this.onStateChange) this.onStateChange(this.getState());
+        const st = this.getState();
+        if ((st.exploded || (st.stopOnIncidents && st.haltedByIncident)) && this.running) {
+            this.setRunning(false);
+        }
+        if (this.onStateChange) this.onStateChange(st);
     }
 
     stepTicks(count = 1) {
         this.inst.exports.stepTicks(count);
-        if (this.onStateChange) this.onStateChange(this.getState());
+        const st = this.getState();
+        if ((st.exploded || (st.stopOnIncidents && st.haltedByIncident)) && this.running) {
+            this.setRunning(false);
+        }
+        if (this.onStateChange) this.onStateChange(st);
     }
 
     reset() {
@@ -164,6 +172,46 @@ class NuclearSimWasm {
         if (notify && this.onStateChange) this.onStateChange(this.getState());
     }
 
+    setCoolantLoopHatchTier(hatchTier, notify = true) {
+        if (this.inst.exports.setCoolantLoopHatchTier) {
+            this.inst.exports.setCoolantLoopHatchTier(this.createJavaString(hatchTier));
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setCoolantLoopDutyCycle(dutyPercent, notify = true) {
+        if (this.inst.exports.setCoolantLoopDutyCycle) {
+            this.inst.exports.setCoolantLoopDutyCycle(dutyPercent);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setCoolantLoopMaxFlow(maxFlow, notify = true) {
+        if (this.inst.exports.setCoolantLoopMaxFlow) {
+            this.inst.exports.setCoolantLoopMaxFlow(maxFlow);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setCoolantLoopMaxPressure(maxPressure, notify = true) {
+        if (this.inst.exports.setCoolantLoopMaxPressure) {
+            this.inst.exports.setCoolantLoopMaxPressure(maxPressure);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setCoolantLoopControl(hatchTier, dutyPercent, maxFlow, maxPressure, notify = true) {
+        if (this.inst.exports.setCoolantLoopControl) {
+            this.inst.exports.setCoolantLoopControl(
+                this.createJavaString(hatchTier),
+                dutyPercent,
+                maxFlow,
+                maxPressure
+            );
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
     setCoolantLoopFlowRate(flowRateLPerSec, notify = true) {
         if (this.inst.exports.setCoolantLoopFlowRate) {
             this.inst.exports.setCoolantLoopFlowRate(flowRateLPerSec);
@@ -200,6 +248,59 @@ class NuclearSimWasm {
         if (notify && this.onStateChange) this.onStateChange(this.getState());
     }
 
+    repair(notify = true) {
+        this.setParam("repair", "true", notify);
+    }
+
+    setStrictMode(strict, notify = true) {
+        if (this.inst.exports.setStrictMode) {
+            this.inst.exports.setStrictMode(Boolean(strict));
+        } else {
+            this.setParam("strict", String(Boolean(strict)), false);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    clearIncidentLog(notify = true) {
+        if (this.inst.exports.clearIncidentLog) {
+            this.inst.exports.clearIncidentLog();
+        } else {
+            this.setParam("clearIncidentLog", "true", false);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setStopOnIncidents(stop, notify = true) {
+        if (this.inst.exports.setStopOnIncidents) {
+            this.inst.exports.setStopOnIncidents(Boolean(stop));
+        } else {
+            this.setParam("stopOnIncidents", String(Boolean(stop)), false);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    clearHaltedByIncident(notify = true) {
+        if (this.inst.exports.clearHaltedByIncident) {
+            this.inst.exports.clearHaltedByIncident();
+        } else {
+            this.setParam("clearHaltedByIncident", "true", false);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setAutoSupplyFuel(autoSupply, notify = true) {
+        if (this.inst.exports.setAutoSupplyFuel) {
+            this.inst.exports.setAutoSupplyFuel(Boolean(autoSupply));
+        } else {
+            this.setParam("autoSupplyFuel", String(Boolean(autoSupply)), false);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setAutoReplaceFuel(autoReplace, notify = true) {
+        this.setAutoSupplyFuel(autoReplace, notify);
+    }
+
     setRunning(run) {
         this.running = run;
         this.inst.exports.setRunning(run);
@@ -207,9 +308,9 @@ class NuclearSimWasm {
             if (!this.ticker) {
                 this.ticker = setInterval(() => {
                     const st = this.getState();
-                    if (!st.exploded && this.running) {
+                    if (!st.exploded && !(st.stopOnIncidents && st.haltedByIncident) && this.running) {
                         this.step();
-                    } else if (st.exploded) {
+                    } else if (st.exploded || (st.stopOnIncidents && st.haltedByIncident)) {
                         this.setRunning(false);
                     }
                 }, this.simSpeedMs);
@@ -233,9 +334,9 @@ class NuclearSimWasm {
             clearInterval(this.ticker);
             this.ticker = setInterval(() => {
                 const st = this.getState();
-                if (!st.exploded && this.running) {
+                if (!st.exploded && !(st.stopOnIncidents && st.haltedByIncident) && this.running) {
                     this.step();
-                } else if (st.exploded) {
+                } else if (st.exploded || (st.stopOnIncidents && st.haltedByIncident)) {
                     this.setRunning(false);
                 }
             }, this.simSpeedMs);

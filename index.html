@@ -42,6 +42,38 @@
   button.primary:hover { background: #0096c7; }
   button.danger { background: #b91c1c; border-color: #dc2626; }
   select { background: #233044; border: 1px solid var(--border-color); color: #fff; padding: 8px; border-radius: 6px; font-size: 0.85rem; min-height: 38px; cursor: pointer; }
+  /* Sim Options Bar */
+  .sim-options-bar {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 6px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    font-size: 0.8rem;
+  }
+  .sim-options-label {
+    color: #94a3b8;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+  }
+  .sim-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: var(--text-primary);
+    user-select: none;
+    transition: color 0.15s;
+  }
+  .sim-toggle-label:hover {
+    color: #fff;
+  }
 
   /* Grid Toolbar & Controls */
   .grid-toolbar {
@@ -332,8 +364,102 @@
   .stat-val.warn { color: var(--warning); }
   .stat-val.danger { color: var(--danger); }
 
-  /* Alert banner */
-  #alert-box { display: none; background: rgba(255, 71, 87, 0.2); border: 1px solid var(--danger); color: #ffb8b8; padding: 12px; border-radius: 6px; margin-bottom: 12px; width: 100%; font-size: 0.85rem; }
+  /* Alert banner & Incident warnings */
+  @keyframes alert-pulse {
+    0% { box-shadow: 0 0 10px rgba(255, 71, 87, 0.6); }
+    50% { box-shadow: 0 0 22px rgba(255, 165, 2, 0.8); }
+    100% { box-shadow: 0 0 10px rgba(255, 71, 87, 0.6); }
+  }
+  @keyframes warning-flash {
+    0% { background-color: rgba(255, 71, 87, 0.5); transform: scale(1.008); }
+    100% { background-color: rgba(255, 165, 2, 0.15); transform: scale(1); }
+  }
+  #alert-box {
+    display: none;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    width: 100%;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+  }
+  #alert-box.alert-danger {
+    background: rgba(255, 71, 87, 0.25);
+    border: 1px solid var(--danger);
+    color: #ffb8b8;
+    animation: alert-pulse 1s infinite;
+  }
+  #alert-box.alert-warning {
+    background: rgba(255, 165, 2, 0.15);
+    border: 1px solid var(--warning);
+    color: #fed7aa;
+    animation: alert-pulse 1.8s infinite;
+  }
+  #alert-box.flash {
+    animation: warning-flash 0.4s ease-out;
+  }
+
+  /* Incident Log Card & Entries */
+  .incident-log-container {
+    width: 100%;
+    background: #131a24;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 12px;
+  }
+  .incident-entry {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    background: #0f172a;
+    border-left: 3px solid #64748b;
+    font-size: 0.76rem;
+    line-height: 1.3;
+  }
+  .incident-entry.thermal-shock {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.08);
+  }
+  .incident-entry.casing-overheat {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+  }
+  .incident-entry.fuel-burned {
+    border-left-color: #dc2626;
+    background: rgba(220, 38, 38, 0.1);
+  }
+  .incident-entry.hatch-voided {
+    border-left-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.08);
+  }
+  .incident-entry.meltdown {
+    border-left-color: #b91c1c;
+    background: rgba(185, 28, 28, 0.15);
+    color: #fca5a5;
+    font-weight: 600;
+  }
+  .incident-entry.repair {
+    border-left-color: #10b981;
+    background: rgba(16, 185, 129, 0.08);
+    color: #a7f3d0;
+  }
+  .incident-tick {
+    color: #94a3b8;
+    font-family: monospace;
+    font-weight: 700;
+    min-width: 65px;
+  }
+  .incident-badge-type {
+    font-size: 0.68rem;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
 
   /* Canvas Chart */
   canvas#chartCanvas { width: 100%; height: 160px; background: #0a0d13; border-radius: 6px; border: 1px solid var(--border-color); }
@@ -392,8 +518,11 @@
 <header>
   <h1><span>⚛</span> Modular Pressure Tube Reactor (MPTR) Standalone Simulator</h1>
   <div style="display:flex; gap:10px; align-items:center;">
-    <span class="badge" id="engine-badge" style="background:#065f46; border-color:#059669; color:#34d399; cursor:pointer;" onclick="toggleEngineMode()" title="Click to toggle between Client WASM and Server mode">⚡ WASM Client</span>
+    <span class="badge" id="engine-badge" style="background:#065f46; border-color:#059669; color:#34d399;" title="Simulation running client-side via WebAssembly">⚡ Client WASM (0ms)</span>
     <span class="badge" id="casing-badge">Electrum Casing (1000°C Max)</span>
+    <span class="badge" id="damage-badge" style="display:none; color:var(--danger); border-color:var(--danger);" title="Cumulative Reactor Structural Damage">Damage: 0.0%</span>
+    <span class="badge" id="maint-badge" style="color:var(--success);" title="Maintenance Health (Efficiency Penalty)">Maint: 100%</span>
+    <button id="btn-quick-repair" onclick="quickRepair()" style="display:none; padding:2px 8px; font-size:0.75rem; background:#1e293b; border-color:var(--warning); color:var(--warning);" title="Repair structural damage and clear maintenance issues">🔧 Repair</button>
     <span class="badge" id="status-badge" style="color:var(--success);">STATUS: STANDBY</span>
   </div>
 </header>
@@ -456,6 +585,20 @@
       </div>
     </div>
 
+    <div class="sim-options-bar">
+      <span class="sim-options-label">Simulation Options:</span>
+      <label class="sim-toggle-label" title="Automatically pause simulation whenever an incident occurs (overheated cell, dry thermal shock, or reactor damage)">
+        <input type="checkbox" id="chk-stop-incidents" onchange="toggleStopOnIncidents(this.checked)" style="cursor:pointer; accent-color:var(--warning);">
+        <span>🛑 Stop on Incidents</span>
+        <span id="lbl-stop-incidents" style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(Off)</span>
+      </label>
+      <label class="sim-toggle-label" title="Continuously supplies fresh 100%-durability fuel rods when spent or burned, and auto-replenishes liquid fuel hatches to maximum">
+        <input type="checkbox" id="chk-auto-supply-fuel" checked onchange="toggleAutoSupplyFuel(this.checked)" style="cursor:pointer; accent-color:#34d399;">
+        <span>🔄 Auto-Supply Fuel</span>
+        <span id="lbl-auto-supply-fuel" style="font-size:0.7rem; color:#34d399; font-weight:600;">(Enabled)</span>
+      </label>
+    </div>
+
     <div class="grid-toolbar">
       <div class="grid-toolbar-title">
         <span id="grid-dim-label">Chamber Grid (9×9)</span>
@@ -482,6 +625,23 @@
 
     <div class="grid-container-wrapper">
       <div id="reactor-grid"></div>
+    </div>
+
+    <!-- Incident & Event Log Panel -->
+    <div class="incident-log-container" id="incident-log-container">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <h3 style="font-size:0.85rem; color:#f59e0b; margin:0;">📋 Incident &amp; Event Log</h3>
+          <span class="badge" id="incident-count-badge" style="font-size:0.7rem; color:#f59e0b; border-color:#f59e0b;">0 events</span>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button type="button" onclick="quickRepair()" style="padding:2px 8px; font-size:0.72rem; background:#1e293b; border-color:var(--warning); color:var(--warning);" title="Repair structural damage and clear maintenance issues">🔧 Quick Repair</button>
+          <button type="button" onclick="clearIncidentLog()" style="padding:2px 8px; font-size:0.72rem;" title="Clear incident history">Clear Log</button>
+        </div>
+      </div>
+      <div id="incident-log-list" style="max-height:130px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
+        <div style="font-style:italic; font-size:0.75rem; color:#64748b; padding:4px 6px;">No incidents recorded. Chamber operating nominally.</div>
+      </div>
     </div>
   </div>
 
@@ -529,20 +689,25 @@
           <input id="p-eu-per-degree" type="number" step="1.0" value="32.0" onchange="submitSimParams()" style="width:100%; background:#233044; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:6px; font-size:0.8rem;">
         </div>
         <div>
-          <label style="font-size:0.7rem; color:var(--text-muted);">Fission Heat (EU/n):</label>
-          <input id="p-fission-heat" type="number" step="0.1" value="77.2" onchange="submitSimParams()" style="width:100%; background:#233044; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:6px; font-size:0.8rem;">
+          <label style="font-size:0.7rem; color:var(--text-muted);">Base Conductance:</label>
+          <input id="p-base-conductance" type="number" step="1.0" value="32.0" onchange="submitSimParams()" title="Base hatch conductance in EU/(t·°C)" style="width:100%; background:#233044; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:6px; font-size:0.8rem;">
         </div>
       </div>
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:6px;">
         <div>
+          <label style="font-size:0.7rem; color:var(--text-muted);">Fission Heat (EU/n):</label>
+          <input id="p-fission-heat" type="number" step="0.1" value="77.2" onchange="submitSimParams()" style="width:100%; background:#233044; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:6px; font-size:0.8rem;">
+        </div>
+        <div>
           <label style="font-size:0.7rem; color:var(--text-muted);">Global Fission Mult (k):</label>
           <input id="p-fiss-mult" type="number" step="0.005" value="0.348" onchange="submitSimParams()" style="width:100%; background:#233044; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:6px; font-size:0.8rem;">
         </div>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:6px;">
         <div>
           <label style="font-size:0.7rem; color:var(--text-muted);">Ambient Temp (°C):</label>
           <input id="p-ambient-temp" type="number" step="1.0" value="20.0" onchange="submitSimParams()" style="width:100%; background:#233044; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:6px; font-size:0.8rem;">
         </div>
-      </div>
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:6px;">
         <div>
           <label style="font-size:0.7rem; color:var(--text-muted);">Hatch Capacity (L):</label>
@@ -637,9 +802,36 @@
           </select>
         </div>
         <div>
-          <label style="font-size:0.7rem; color:var(--text-muted);">Pump Power (EU/t):</label>
-          <input id="loop-pump-power-input" type="number" min="0" step="50" value="250" onchange="onCoolantLoopConfigChange()" style="width:100%; background:#233044; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:6px; font-size:0.8rem;">
+          <label style="font-size:0.7rem; color:var(--text-muted);">Pump Energy Hatch:</label>
+          <select id="loop-hatch-tier-select" onchange="onCoolantLoopConfigChange()" style="width:100%;">
+            <option value="LV">LV (32 EU/t)</option>
+            <option value="MV">MV (128 EU/t)</option>
+            <option value="HV">HV (512 EU/t)</option>
+            <option value="EV" selected>EV (2,048 EU/t)</option>
+            <option value="IV">IV (8,192 EU/t)</option>
+            <option value="LUV">LuV (32,768 EU/t)</option>
+            <option value="ZPM">ZPM (131,072 EU/t)</option>
+            <option value="UV">UV (524,288 EU/t)</option>
+            <option value="UHV">UHV (2,097,152 EU/t)</option>
+          </select>
         </div>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:6px;">
+        <div>
+          <label style="font-size:0.7rem; color:var(--text-muted);">Duty Cycle (%):</label>
+          <input id="loop-duty-cycle-input" type="number" min="0" max="100" step="5" value="100" onchange="onCoolantLoopConfigChange()" style="width:100%; background:#233044; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:6px; font-size:0.8rem;">
+        </div>
+        <div>
+          <label style="font-size:0.7rem; color:var(--text-muted);">Max Flow (L/s):</label>
+          <input id="loop-max-flow-input" type="number" min="0" step="10" placeholder="No limit" onchange="onCoolantLoopConfigChange()" style="width:100%; background:#233044; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:6px; font-size:0.8rem;">
+        </div>
+        <div>
+          <label style="font-size:0.7rem; color:var(--text-muted);">Max Press (bar):</label>
+          <input id="loop-max-pressure-input" type="number" min="0" step="5" placeholder="Auto" onchange="onCoolantLoopConfigChange()" style="width:100%; background:#233044; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:6px; font-size:0.8rem;">
+        </div>
+      </div>
+      <div id="loop-throttled-banner" style="display:none; margin:4px 0 8px 0; font-size:0.74rem; color:#fde047; background:rgba(234,179,8,0.15); border:1px solid #eab308; border-radius:4px; padding:6px 8px; align-items:center; gap:6px;">
+        <span>⚙️</span> <span id="loop-throttled-text">Pump duty cycle limited by pipe pressure constraints</span>
       </div>
       <div style="display:flex; gap:6px; margin-bottom:8px;">
         <button id="btn-loop-attach-mode" onclick="toggleLoopAttachMode()" style="flex:1; font-size:0.75rem; padding:4px 8px; background:#0284c7;">🔗 Attach Points Mode</button>
@@ -791,6 +983,58 @@
     <div class="stat-row"><span>Tritium Bred:</span><span class="stat-val" id="stat-tritium" style="color:#d946ef;">0 L</span></div>
     <div class="stat-row"><span>Power Generation:</span><span class="stat-val safe" id="stat-power">0 EU/t</span></div>
 
+    <!-- Fuel & Coolant Byproducts Subsystem -->
+    <div id="fuel-byproducts-card" style="background:#131a24; border:1px solid #10b981; border-radius:6px; padding:12px; margin-top:12px; margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <h3 style="font-size:0.95rem; color:#10b981; margin:0;">♻️ Fuel &amp; Byproduct Logistics</h3>
+          <span class="badge" id="byproduct-rate-badge" style="font-size:0.7rem; color:#34d399; border-color:#059669;">0 items / min</span>
+        </div>
+        <div class="segmented-control" style="font-size:0.7rem;">
+          <button type="button" class="seg-btn active" id="btn-byproduct-min" onclick="setByproductUnit('min')" title="Display byproduct rates per minute">/min</button>
+          <button type="button" class="seg-btn" id="btn-byproduct-hour" onclick="setByproductUnit('hour')" title="Display byproduct rates per hour">/h</button>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; border:1px solid #1e293b; border-radius:4px; padding:6px 8px; margin-bottom:8px;">
+        <span style="font-size:0.75rem; color:var(--text-primary); display:flex; align-items:center; gap:4px;">
+          <span>🔄 Auto-Supply Fuel (Continuous Cycling):</span>
+        </span>
+        <label style="display:inline-flex; align-items:center; gap:4px; cursor:pointer; font-size:0.75rem; color:var(--text-muted); user-select:none;">
+          <input type="checkbox" id="chk-auto-refuel" checked onchange="toggleAutoSupplyFuel(this.checked)" style="cursor:pointer;">
+          <span id="lbl-auto-refuel" style="color:#34d399; font-weight:600;">Enabled</span>
+        </label>
+      </div>
+
+      <div id="byproducts-content" style="font-size:0.75rem;">
+        <div style="margin-bottom:6px;">
+          <div style="font-weight:700; font-size:0.72rem; color:#94a3b8; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.5px; display:flex; justify-content:space-between;">
+            <span>Depleted Fuel Rods</span>
+            <span id="byproduct-solid-total" style="color:#34d399; font-weight:bold;">0 / min</span>
+          </div>
+          <div id="byproduct-solid-list" style="display:flex; flex-direction:column; gap:4px;">
+            <div style="font-style:italic; color:#64748b; padding:2px 0;">No active fuel rods burning.</div>
+          </div>
+        </div>
+
+        <div id="byproduct-liquid-section" style="margin-bottom:6px; display:none;">
+          <div style="font-weight:700; font-size:0.72rem; color:#94a3b8; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.5px; display:flex; justify-content:space-between;">
+            <span>Depleted Fluid Fuels</span>
+            <span id="byproduct-liquid-total" style="color:#38bdf8; font-weight:bold;">0 L/min</span>
+          </div>
+          <div id="byproduct-liquid-list" style="display:flex; flex-direction:column; gap:4px;"></div>
+        </div>
+
+        <div id="byproduct-isotope-section" style="margin-bottom:2px; display:none;">
+          <div style="font-weight:700; font-size:0.72rem; color:#94a3b8; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.5px; display:flex; justify-content:space-between;">
+            <span>Transmuted Isotopes</span>
+            <span id="byproduct-isotope-total" style="color:#d946ef; font-weight:bold;">0 L/min</span>
+          </div>
+          <div id="byproduct-isotope-list" style="display:flex; flex-direction:column; gap:4px;"></div>
+        </div>
+      </div>
+    </div>
+
     <h3 style="margin-top:12px;">Temperature Trend</h3>
     <canvas id="chartCanvas" width="300" height="150"></canvas>
   </div>
@@ -800,8 +1044,9 @@ let currentState = null;
 let selectedTilePos = null;
 let activePaletteType = "FUEL_URANIUM_QUAD";
 let interactionMode = "INSPECT";
-let isWasmMode = false;
+let isWasmMode = true;
 let wasmSim = null;
+let byproductUnit = "min";
 
 function getIconUrl(type) {
   return `icons/${type}.png`;
@@ -844,44 +1089,18 @@ async function initEngine() {
       console.log("⚡ Modular Nuclear Simulator running via WebAssembly (WASM)!");
       return true;
     } catch (err) {
-      console.warn("WASM initialization fallback to Java server:", err);
-      isWasmMode = false;
+      console.error("WASM initialization error:", err);
       const eb = document.getElementById("engine-badge");
       if (eb) {
-        eb.innerText = "🌐 Java Server (HTTP)";
-        eb.style.background = "#1e293b";
-        eb.style.borderColor = "#334155";
-        eb.style.color = "#94a3b8";
+        eb.innerText = "❌ WASM Error";
+        eb.style.background = "#7f1d1d";
+        eb.style.borderColor = "#b91c1c";
+        eb.style.color = "#f87171";
       }
       return false;
     }
   }
   return false;
-}
-
-function toggleEngineMode() {
-  if (!wasmSim) {
-    alert("WebAssembly engine is not available in this environment.");
-    return;
-  }
-  isWasmMode = !isWasmMode;
-  const eb = document.getElementById("engine-badge");
-  if (isWasmMode) {
-    eb.innerText = "⚡ Client WASM (0ms)";
-    eb.style.background = "#065f46";
-    eb.style.borderColor = "#059669";
-    eb.style.color = "#34d399";
-    currentState = wasmSim.getState();
-    renderUI();
-  } else {
-    eb.innerText = "🌐 Java Server (HTTP)";
-    eb.style.background = "#1e293b";
-    eb.style.borderColor = "#334155";
-    eb.style.color = "#94a3b8";
-    if (wasmSim.running) wasmSim.setRunning(false);
-    fetchState();
-    schedulePoll();
-  }
 }
 
 const PALETTE = [
@@ -1041,21 +1260,26 @@ async function changeCoolingMode(mode) {
 
 async function onCoolantLoopConfigChange() {
   const matSelect = document.getElementById("loop-material-select");
-  const mat = matSelect ? matSelect.value : "STEEL";
+  const mat = matSelect ? matSelect.value : "TITANIUM";
   const size = document.getElementById("loop-size-select").value;
   const fluid = document.getElementById("loop-fluid-select").value;
-  const pumpPwr = document.getElementById("loop-pump-power-input").value;
+  const hatch = document.getElementById("loop-hatch-tier-select").value;
+  const duty = parseFloat(document.getElementById("loop-duty-cycle-input").value) || 0;
+  const maxFlowVal = document.getElementById("loop-max-flow-input").value;
+  const maxFlow = maxFlowVal !== "" ? (parseFloat(maxFlowVal) || 0) : 0;
+  const maxPressVal = document.getElementById("loop-max-pressure-input").value;
+  const maxPress = maxPressVal !== "" ? (parseFloat(maxPressVal) || 0) : 0;
 
   if (isWasmMode && wasmSim) {
     wasmSim.setCoolantLoopMaterial(mat, false);
     wasmSim.setCoolantLoopPipeSize(size, false);
     wasmSim.setCoolantLoopFluid(fluid, false);
-    wasmSim.setCoolantLoopPumpPower(parseFloat(pumpPwr), true);
+    wasmSim.setCoolantLoopControl(hatch, duty, maxFlow, maxPress, true);
     currentState = wasmSim.getState();
     renderUI();
     return;
   }
-  const url = `/api/set-coolant-loop?material=${encodeURIComponent(mat)}&size=${encodeURIComponent(size)}&fluid=${encodeURIComponent(fluid)}&pumpPower=${encodeURIComponent(pumpPwr)}`;
+  const url = `/api/set-coolant-loop?material=${encodeURIComponent(mat)}&size=${encodeURIComponent(size)}&fluid=${encodeURIComponent(fluid)}&hatchTier=${encodeURIComponent(hatch)}&dutyCycle=${duty}&maxFlow=${maxFlow}&maxPressure=${maxPress}`;
   await fetch(url);
   await fetchState();
   schedulePoll();
@@ -1305,6 +1529,31 @@ function schedulePoll() {
   }, delay);
 }
 
+async function quickRepair() {
+  if (isWasmMode && wasmSim) {
+    wasmSim.repair();
+    currentState = wasmSim.getState();
+    renderUI();
+    return;
+  }
+  await fetch("/api/set-params?repair=true");
+  await fetchState();
+  schedulePoll();
+}
+
+async function clearIncidentLog() {
+  if (isWasmMode && wasmSim) {
+    wasmSim.clearIncidentLog();
+    currentState = wasmSim.getState();
+    renderUI();
+    return;
+  }
+  if (currentState) {
+    currentState.incidentLog = [];
+    renderUI();
+  }
+}
+
 function renderUI() {
   if (!currentState) return;
 
@@ -1314,14 +1563,109 @@ function renderUI() {
   const playBtn = document.getElementById("btn-play");
   const alertBox = document.getElementById("alert-box");
 
+  // Damage & Maintenance indicators
+  const dmgBadge = document.getElementById("damage-badge");
+  const maintBadge = document.getElementById("maint-badge");
+  const repairBtn = document.getElementById("btn-quick-repair");
+  if (dmgBadge) {
+    if (currentState.reactorDamage && currentState.reactorDamage > 0) {
+      dmgBadge.style.display = "inline-block";
+      dmgBadge.innerText = "Damage: " + currentState.reactorDamage.toFixed(1) + "%";
+    } else {
+      dmgBadge.style.display = "none";
+    }
+  }
+  if (maintBadge) {
+    const effPct = (currentState.maintenanceEfficiency != null ? (currentState.maintenanceEfficiency * 100).toFixed(0) : "100");
+    const issues = currentState.maintenanceIssues || 0;
+    maintBadge.innerText = `Maint: ${effPct}% (${issues} issues)`;
+    maintBadge.style.color = (issues === 0 && (!currentState.reactorDamage || currentState.reactorDamage === 0)) ? "var(--success)" : "var(--warning)";
+  }
+  if (repairBtn) {
+    repairBtn.style.display = (currentState.reactorDamage > 0 || (currentState.maintenanceIssues && currentState.maintenanceIssues > 0)) ? "inline-block" : "none";
+  }
+
+  // Sync Simulation Options toggles
+  const chkStopInc = document.getElementById("chk-stop-incidents");
+  const lblStopInc = document.getElementById("lbl-stop-incidents");
+  if (chkStopInc && currentState.stopOnIncidents !== undefined) {
+    chkStopInc.checked = Boolean(currentState.stopOnIncidents);
+    if (lblStopInc) {
+      lblStopInc.innerText = chkStopInc.checked ? "(Enabled)" : "(Off)";
+      lblStopInc.style.color = chkStopInc.checked ? "var(--warning)" : "var(--text-muted)";
+      lblStopInc.style.fontWeight = chkStopInc.checked ? "600" : "normal";
+    }
+  }
+
+  const chkAutoSupply = document.getElementById("chk-auto-supply-fuel");
+  const lblAutoSupply = document.getElementById("lbl-auto-supply-fuel");
+  const chkAutoRefuel = document.getElementById("chk-auto-refuel");
+  const lblAutoRefuel = document.getElementById("lbl-auto-refuel");
+  const autoSupplyVal = Boolean(currentState.autoSupplyFuel !== undefined ? currentState.autoSupplyFuel : currentState.autoReplaceFuel);
+  if (chkAutoSupply) {
+    chkAutoSupply.checked = autoSupplyVal;
+    if (lblAutoSupply) {
+      lblAutoSupply.innerText = autoSupplyVal ? "(Enabled)" : "(Off)";
+      lblAutoSupply.style.color = autoSupplyVal ? "#34d399" : "var(--text-muted)";
+      lblAutoSupply.style.fontWeight = autoSupplyVal ? "600" : "normal";
+    }
+  }
+  if (chkAutoRefuel) {
+    chkAutoRefuel.checked = autoSupplyVal;
+    if (lblAutoRefuel) {
+      lblAutoRefuel.innerText = autoSupplyVal ? "Enabled" : "Disabled";
+      lblAutoRefuel.style.color = autoSupplyVal ? "#34d399" : "var(--text-muted)";
+    }
+  }
+
   if (currentState.exploded) {
-    statusBadge.innerText = "MELTDOWN / EXPLODED";
+    if (isWasmMode && wasmSim && wasmSim.running) {
+      wasmSim.setRunning(false);
+    }
+    statusBadge.innerText = "MELTDOWN / EXPLODED - STOPPED";
     statusBadge.style.color = "var(--danger)";
     playBtn.innerText = "▶ Start Simulation";
     playBtn.disabled = true;
+    alertBox.className = "alert-danger flash";
     alertBox.style.display = "block";
-    alertBox.innerHTML = `<strong>⚠️ CRITICAL FAILURE:</strong> ${currentState.explosionReason}`;
+    alertBox.innerHTML = `<strong>💥 MELTDOWN / CATASTROPHIC FAILURE:</strong> ${currentState.explosionReason} <span style="display:block; margin-top:4px; font-size:0.8rem; font-weight:normal;">Simulation automatically halted due to core destruction. Click ↺ Reset to restart.</span>`;
+  } else if (currentState.haltedByIncident) {
+    if (isWasmMode && wasmSim && wasmSim.running) {
+      wasmSim.setRunning(false);
+    }
+    statusBadge.innerText = "INCIDENT PAUSE";
+    statusBadge.style.color = "var(--warning)";
+    playBtn.disabled = false;
+    playBtn.innerText = "▶ Resume Simulation";
+    alertBox.className = "alert-warning flash";
+    alertBox.style.display = "block";
+    const reason = currentState.lastHaltIncidentReason || "Bad reactor condition detected";
+    alertBox.innerHTML = `<strong>🛑 SIMULATION PAUSED ON INCIDENT:</strong> ${reason} <span style="display:block; margin-top:4px; font-size:0.8rem; font-weight:normal;">Halted by "Stop on Incidents" option. Click <strong>▶ Resume Simulation</strong> to continue or <strong>Step +1</strong> to advance tick-by-tick.</span>`;
+  } else if (currentState.reactorDamage && currentState.reactorDamage > 0) {
+    // Active structural damage warning: flashes alert banner, but fission continues
+    const latestInc = (currentState.incidentLog && currentState.incidentLog.length > 0)
+      ? currentState.incidentLog[currentState.incidentLog.length - 1]
+      : null;
+    const incidentMsg = latestInc ? ` [Tick ${latestInc.tick}: ${latestInc.message}]` : "";
+    const isNewAlert = (window.__lastAlertTick !== currentState.lastIncidentTick);
+    window.__lastAlertTick = currentState.lastIncidentTick;
+    alertBox.className = "alert-warning" + (isNewAlert ? " flash" : "");
+    alertBox.style.display = "block";
+    const effPct = (currentState.maintenanceEfficiency != null ? (currentState.maintenanceEfficiency * 100).toFixed(0) : "100");
+    alertBox.innerHTML = `<strong>⚠️ REACTOR DAMAGE DETECTED (${currentState.reactorDamage.toFixed(1)}% Structural Damage, Maint: ${effPct}%):</strong> Operating with maintenance penalties.${incidentMsg} <button type="button" onclick="quickRepair()" style="margin-left:8px; padding:2px 8px; font-size:0.75rem; background:#1e293b; border:1px solid var(--warning); color:var(--warning); cursor:pointer; border-radius:4px;">🔧 Repair Now</button>`;
+
+    playBtn.disabled = false;
+    if (currentState.isRunning) {
+      statusBadge.innerText = `DAMAGED (${currentState.reactorDamage.toFixed(1)}%) - RUNNING`;
+      statusBadge.style.color = "var(--warning)";
+      playBtn.innerText = "⏸ Pause Simulation";
+    } else {
+      statusBadge.innerText = `DAMAGED (${currentState.reactorDamage.toFixed(1)}%) - PAUSED`;
+      statusBadge.style.color = "var(--warning)";
+      playBtn.innerText = "▶ Resume Simulation";
+    }
   } else {
+    alertBox.className = "";
     alertBox.style.display = "none";
     playBtn.disabled = false;
     if (currentState.isRunning) {
@@ -1332,6 +1676,70 @@ function renderUI() {
       statusBadge.innerText = "SIMULATION PAUSED";
       statusBadge.style.color = "var(--success)";
       playBtn.innerText = "▶ Resume Simulation";
+    }
+  }
+
+  // Render Incident & Event Log
+  const incidentListEl = document.getElementById("incident-log-list");
+  const incidentBadgeEl = document.getElementById("incident-count-badge");
+  if (incidentListEl && currentState.incidentLog) {
+    const count = currentState.incidentLog.length;
+    if (incidentBadgeEl) {
+      incidentBadgeEl.innerText = `${count} event${count === 1 ? "" : "s"}`;
+      incidentBadgeEl.style.color = count > 0 ? "var(--warning)" : "var(--text-muted)";
+      incidentBadgeEl.style.borderColor = count > 0 ? "var(--warning)" : "var(--border-color)";
+    }
+    if (count === 0) {
+      incidentListEl.innerHTML = `<div style="font-style:italic; font-size:0.75rem; color:#64748b; padding:4px 6px;">No incidents recorded. Chamber operating nominally.</div>`;
+    } else {
+      let html = "";
+      for (let i = count - 1; i >= 0; i--) {
+        const ev = currentState.incidentLog[i];
+        let cls = "";
+        let badgeColor = "#94a3b8";
+        let badgeBg = "#1e293b";
+        switch (ev.type) {
+          case "THERMAL_SHOCK":
+            cls = "thermal-shock";
+            badgeColor = "#f59e0b";
+            badgeBg = "rgba(245,158,11,0.2)";
+            break;
+          case "CASING_OVERHEAT":
+            cls = "casing-overheat";
+            badgeColor = "#ef4444";
+            badgeBg = "rgba(239,68,68,0.2)";
+            break;
+          case "FUEL_BURNED":
+            cls = "fuel-burned";
+            badgeColor = "#dc2626";
+            badgeBg = "rgba(220,38,38,0.2)";
+            break;
+          case "HATCH_VOIDED":
+            cls = "hatch-voided";
+            badgeColor = "#38bdf8";
+            badgeBg = "rgba(56,189,248,0.2)";
+            break;
+          case "MELTDOWN":
+            cls = "meltdown";
+            badgeColor = "#f87171";
+            badgeBg = "rgba(185,28,28,0.3)";
+            break;
+          case "REPAIR":
+            cls = "repair";
+            badgeColor = "#34d399";
+            badgeBg = "rgba(16,185,129,0.2)";
+            break;
+          default:
+            cls = "";
+        }
+        html += `<div class="incident-entry ${cls}">
+          <span class="incident-tick">[Tick ${ev.tick}]</span>
+          <span class="incident-badge-type" style="color:${badgeColor}; background:${badgeBg};">${ev.type}</span>
+          <span style="flex:1;">${ev.message}</span>
+          ${ev.damage > 0 ? `<span style="color:#f87171; font-weight:bold;">+${ev.damage.toFixed(1)}% dmg</span>` : ""}
+        </div>`;
+      }
+      incidentListEl.innerHTML = html;
     }
   }
 
@@ -1404,8 +1812,47 @@ function renderUI() {
     if (sizeSel && activeEl !== sizeSel && sizeSel.value !== cl.pipeSize) sizeSel.value = cl.pipeSize;
     const fluidSel = document.getElementById("loop-fluid-select");
     if (fluidSel && activeEl !== fluidSel && fluidSel.value !== cl.fluid) fluidSel.value = cl.fluid;
-    const pwrIn = document.getElementById("loop-pump-power-input");
-    if (pwrIn && activeEl !== pwrIn) pwrIn.value = Math.round(cl.pumpPowerEUt);
+    const hatchSel = document.getElementById("loop-hatch-tier-select");
+    if (hatchSel && activeEl !== hatchSel && cl.hatchTier && hatchSel.value !== cl.hatchTier) {
+      hatchSel.value = cl.hatchTier;
+    }
+    const dutyIn = document.getElementById("loop-duty-cycle-input");
+    if (dutyIn && activeEl !== dutyIn && cl.dutyCyclePercent !== undefined) {
+      if (Math.abs(parseFloat(dutyIn.value || 0) - cl.dutyCyclePercent) > 0.01) {
+        dutyIn.value = Math.round(cl.dutyCyclePercent);
+      }
+    }
+    const maxFlowIn = document.getElementById("loop-max-flow-input");
+    if (maxFlowIn && activeEl !== maxFlowIn) {
+      const currentVal = maxFlowIn.value ? parseFloat(maxFlowIn.value) : 0;
+      const targetVal = cl.maxFlowRateLimit || 0;
+      if (currentVal !== targetVal) {
+        maxFlowIn.value = targetVal > 0 ? targetVal : "";
+      }
+    }
+    const maxPressIn = document.getElementById("loop-max-pressure-input");
+    if (maxPressIn && activeEl !== maxPressIn) {
+      const currentVal = maxPressIn.value ? parseFloat(maxPressIn.value) : 0;
+      const targetVal = cl.maxPressureLimit || 0;
+      if (currentVal !== targetVal) {
+        maxPressIn.value = targetVal > 0 ? targetVal : "";
+      }
+    }
+
+    // Throttled / Pressure Constraint Banner
+    const throttledBanner = document.getElementById("loop-throttled-banner");
+    const throttledText = document.getElementById("loop-throttled-text");
+    if (throttledBanner && throttledText) {
+      if (cl.pressureLimited) {
+        throttledBanner.style.display = "flex";
+        throttledText.innerHTML = `<b>Pump Limited by Pressure:</b> ${cl.limitReason}. Duty cycle throttled to <b>${cl.effectiveDutyCyclePercent.toFixed(0)}%</b> (${Math.round(cl.lastPumpPowerEUt)} EU/t).`;
+      } else if (cl.flowLimited) {
+        throttledBanner.style.display = "flex";
+        throttledText.innerHTML = `<b>Pump Limited by Flow:</b> ${cl.limitReason}. Duty cycle throttled to <b>${cl.effectiveDutyCyclePercent.toFixed(0)}%</b> (${Math.round(cl.lastPumpPowerEUt)} EU/t).`;
+      } else {
+        throttledBanner.style.display = "none";
+      }
+    }
 
     // Status Badge
     const statusBadge = document.getElementById("loop-status-badge");
@@ -1416,6 +1863,12 @@ function renderUI() {
       } else if (cl.currentCoolantTempCelsius > cl.maxTempC) {
         statusBadge.innerText = "🔥 MELTED";
         statusBadge.style.color = "var(--danger)";
+      } else if (cl.pressureLimited) {
+        statusBadge.innerText = "⚙️ PRESSURE LIMITED";
+        statusBadge.style.color = "#fde047";
+      } else if (cl.flowLimited) {
+        statusBadge.innerText = "⚙️ FLOW LIMITED";
+        statusBadge.style.color = "#38bdf8";
       } else if (cl.currentPressureBar > cl.maxPressureBar * 0.85) {
         statusBadge.innerText = "⚠️ HIGH PRESSURE";
         statusBadge.style.color = "var(--warning)";
@@ -1426,7 +1879,11 @@ function renderUI() {
     }
 
     const flowEl = document.getElementById("loop-flow-val");
-    if (flowEl) flowEl.innerText = `${cl.currentFlowRateLPerSec.toFixed(1)} L/s`;
+    if (flowEl) {
+      let flowTxt = `${cl.currentFlowRateLPerSec.toFixed(1)} L/s`;
+      if (cl.flowLimited) flowTxt += " [CAPPED]";
+      flowEl.innerText = flowTxt;
+    }
 
     const pressEl = document.getElementById("loop-pressure-val");
     const pressRatio = cl.maxPressureBar > 0 ? (cl.currentPressureBar / cl.maxPressureBar) : 0;
@@ -1452,7 +1909,13 @@ function renderUI() {
     if (steamEl) steamEl.innerText = `${Math.round(cl.lastSecondarySteamProducedLt).toLocaleString()} L/t (Water: ${cl.lastSecondaryWaterBoiledLt.toFixed(1)} L/t)`;
 
     const pumpEl = document.getElementById("loop-pump-val");
-    if (pumpEl) pumpEl.innerText = `-${Math.round(cl.lastPumpPowerEUt).toLocaleString()} EU/t`;
+    if (pumpEl) {
+      let pText = `-${Math.round(cl.lastPumpPowerEUt).toLocaleString()} EU/t`;
+      if (cl.hatchTier) {
+        pText += ` (${cl.effectiveDutyCyclePercent.toFixed(0)}% duty of ${cl.hatchTier} ${Math.round(cl.hatchVoltage || 0).toLocaleString()} EU/t)`;
+      }
+      pumpEl.innerText = pText;
+    }
 
     const ptsEl = document.getElementById("loop-points-val");
     if (ptsEl) ptsEl.innerText = `${cl.attachedPoints ? cl.attachedPoints.length : 0} cell(s) connected`;
@@ -1523,6 +1986,9 @@ function renderUI() {
 
   // Render Machine Process Pipeline
   renderProcessPipeline();
+
+  // Render Fuel & Coolant Byproducts
+  renderByproducts();
 
   // Reconcile and update grid DOM without destroying elements
   updateGridDOM();
@@ -1861,8 +2327,21 @@ function renderInspector(t) {
       <div class="stat-row"><span>Coupling:</span><span class="stat-val" style="color:var(--success);">Direct Convective Loop</span></div>
     `;
   } else if (t.isFuel) {
+    const maxDur = (t.durabilityPct > 0) ? Math.round(t.durability / (t.durabilityPct / 100)) : t.durability;
+    const burnRate = t.lastDurabilityLoss || 0;
+    const durPerMin = burnRate * 1200;
+    const minsLeft = (burnRate > 0 && t.durability > 0)
+      ? (t.durability / durPerMin).toFixed(1) + " min"
+      : (t.durability <= 0 ? "0 min" : "Infinity");
+    const depBadge = t.isDepleted
+      ? '<span class="badge" style="color:var(--danger); background:rgba(255,71,87,0.2);">⚠️ DEPLETED</span>'
+      : '<span class="badge" style="color:var(--success);">ACTIVE</span>';
     extraHtml = `
-      <div class="stat-row"><span>Durability:</span><span class="stat-val">${t.durability} (${t.durabilityPct}%)</span></div>
+      <div class="stat-row"><span>Durability:</span><span class="stat-val">${t.durability.toLocaleString()} / ${maxDur.toLocaleString()} (${t.durabilityPct}%)</span></div>
+      <div class="stat-row"><span>Rod Status:</span><span class="stat-val">${depBadge}</span></div>
+      <div class="stat-row"><span>Depleted Output:</span><span class="stat-val" style="color:#34d399; font-weight:600;"><span class="badge" style="font-size:0.68rem; padding:1px 4px; color:#34d399; border-color:#059669;">${t.depletedCode || "DEP"}</span> ${t.depletedName || "Depleted Fuel Rod"}</span></div>
+      <div class="stat-row"><span>Burn Rate:</span><span class="stat-val" style="color:#fbbf24;">${burnRate.toFixed(2)} / tick (${Math.round(durPerMin).toLocaleString()} / min)</span></div>
+      <div class="stat-row"><span>Est. Remaining Lifespan:</span><span class="stat-val" style="color:#38bdf8;">${minsLeft}</span></div>
     `;
   } else if (t.fluidName && t.fluidName.length > 0) {
     const cap = t.fluidCapacity || 2000;
@@ -1872,9 +2351,19 @@ function renderInspector(t) {
       : '<span class="badge" style="color:var(--success);">NORMAL</span>';
     const steamFlow = t.lastProduced || 0;
     const coolantTurnover = steamFlow > 0 ? (steamFlow / 160).toFixed(0) : 0;
+    const isLiquidFuel = t.type && t.type.startsWith("HATCH_LIQUID_FUEL_");
+    let liqFuelHtml = "";
+    if (isLiquidFuel) {
+      const burnRateL = t.lastLiquidBurned || 0;
+      liqFuelHtml = `
+        <div class="stat-row"><span>Depleted Output:</span><span class="stat-val" style="color:#38bdf8; font-weight:600;">${t.depletedName || "Depleted Fuel Fluid"}</span></div>
+        <div class="stat-row"><span>Fuel Consumption:</span><span class="stat-val" style="color:#f59e0b;">${burnRateL} L/t (${(burnRateL * 1200).toLocaleString()} L/min)</span></div>
+      `;
+    }
     extraHtml = `
       <div class="stat-row"><span>Coolant:</span><span class="stat-val">${t.fluidName}</span></div>
       <div class="stat-row"><span>Coolant Volume:</span><span class="stat-val">${t.fluidAmount} / ${cap} L (${pct}%)</span></div>
+      ${liqFuelHtml}
       <div class="stat-row"><span>Live Turnover:</span><span class="stat-val" style="color:#38bdf8;">${coolantTurnover} L/t coolant &rarr; ${steamFlow} L/t steam</span></div>
       <div class="stat-row"><span>Cumulative Steam:</span><span class="stat-val">${t.steamAmount ? t.steamAmount.toLocaleString() : 0} L</span></div>
       <div class="stat-row"><span>Hatch Status:</span><span class="stat-val">${dryBadge}</span></div>
@@ -1941,6 +2430,7 @@ function syncParamsToUI(p) {
     if (el && active !== el && el.value != val) el.value = val;
   };
   setVal("p-eu-per-degree", p.euPerDegree != null ? p.euPerDegree : 32.0);
+  setVal("p-base-conductance", p.baseHatchConductance != null ? p.baseHatchConductance : 32.0);
   setVal("p-fission-heat", p.fissionHeatPerNeutron != null ? p.fissionHeatPerNeutron : 77.2);
   setVal("p-fiss-mult", p.globalThermalFissionMultiplier != null ? p.globalThermalFissionMultiplier : (p.thermalFissionMultiplier != null ? p.thermalFissionMultiplier : 0.348));
   setVal("p-ambient-temp", p.ambientTemp);
@@ -1956,6 +2446,7 @@ function syncParamsToUI(p) {
 
 async function submitSimParams() {
   const euDeg = document.getElementById("p-eu-per-degree") ? document.getElementById("p-eu-per-degree").value : 32.0;
+  const baseCond = document.getElementById("p-base-conductance") ? document.getElementById("p-base-conductance").value : 32.0;
   const fHeat = document.getElementById("p-fission-heat") ? document.getElementById("p-fission-heat").value : 77.2;
   const fMult = document.getElementById("p-fiss-mult") ? document.getElementById("p-fiss-mult").value : 0.348;
   const amb = document.getElementById("p-ambient-temp").value;
@@ -1970,6 +2461,7 @@ async function submitSimParams() {
 
   if (isWasmMode && wasmSim) {
     wasmSim.setParam("euPerDegree", euDeg);
+    wasmSim.setParam("baseHatchConductance", baseCond);
     wasmSim.setParam("fissionHeat", fHeat);
     wasmSim.setParam("fissionMult", fMult);
     wasmSim.setParam("ambientTemp", amb);
@@ -1986,7 +2478,7 @@ async function submitSimParams() {
     return;
   }
 
-  const url = `/api/set-params?euPerDegree=${euDeg}&fissionHeat=${fHeat}&fissionMult=${fMult}&ambientTemp=${amb}&hatchCapacity=${cap}&turnoverCurve=${curve}&turnoverDeltaTMax=${dt}&turnoverExponent=${exp}&coolantFeedRate=${feed}&coolingHeat=${ch}&ic2CoolantHeat=${ic2Ch}&hpBoil=${hpBoil}`;
+  const url = `/api/set-params?euPerDegree=${euDeg}&baseHatchConductance=${baseCond}&fissionHeat=${fHeat}&fissionMult=${fMult}&ambientTemp=${amb}&hatchCapacity=${cap}&turnoverCurve=${curve}&turnoverDeltaTMax=${dt}&turnoverExponent=${exp}&coolantFeedRate=${feed}&coolingHeat=${ch}&ic2CoolantHeat=${ic2Ch}&hpBoil=${hpBoil}`;
   await fetch(url);
   await fetchState();
   schedulePoll();
@@ -2007,6 +2499,7 @@ async function resetSimParams() {
 function applyProfilePreset(profile) {
   switch (profile) {
     case "BALANCED":
+      if (document.getElementById("p-base-conductance")) document.getElementById("p-base-conductance").value = 32.0;
       document.getElementById("p-hatch-cap").value = 8000;
       document.getElementById("p-turn-curve").value = "SIGMOID";
       document.getElementById("p-turn-dt").value = 100;
@@ -2021,6 +2514,7 @@ function applyProfilePreset(profile) {
       document.getElementById("p-hp-boil").value = 180;
       break;
     case "DANGER":
+      if (document.getElementById("p-base-conductance")) document.getElementById("p-base-conductance").value = 24.0;
       document.getElementById("p-hatch-cap").value = 1000;
       document.getElementById("p-turn-curve").value = "EXPONENTIAL";
       document.getElementById("p-turn-dt").value = 80;
@@ -2034,6 +2528,7 @@ function applyProfilePreset(profile) {
       document.getElementById("p-hp-boil").value = 200;
       break;
     case "FLASH_BOIL":
+      if (document.getElementById("p-base-conductance")) document.getElementById("p-base-conductance").value = 32.0;
       document.getElementById("p-hatch-cap").value = 500;
       document.getElementById("p-turn-curve").value = "SIGMOID";
       document.getElementById("p-turn-dt").value = 60;
@@ -2047,6 +2542,7 @@ function applyProfilePreset(profile) {
       document.getElementById("p-hp-boil").value = 200;
       break;
     case "SAFE":
+      if (document.getElementById("p-base-conductance")) document.getElementById("p-base-conductance").value = 40.0;
       document.getElementById("p-hatch-cap").value = 8000;
       document.getElementById("p-turn-curve").value = "LINEAR";
       document.getElementById("p-turn-dt").value = 150;
@@ -2112,7 +2608,13 @@ function renderChart() {
 }
 
 async function togglePlay() {
+  if (currentState && currentState.exploded) {
+    return;
+  }
   if (isWasmMode && wasmSim) {
+    if (currentState && currentState.haltedByIncident) {
+      wasmSim.clearHaltedByIncident();
+    }
     wasmSim.togglePlay();
     currentState = wasmSim.getState();
     renderUI();
@@ -2124,7 +2626,13 @@ async function togglePlay() {
 }
 
 async function stepSim(count) {
+  if (currentState && currentState.exploded) {
+    return;
+  }
   if (isWasmMode && wasmSim) {
+    if (currentState && currentState.haltedByIncident) {
+      wasmSim.clearHaltedByIncident();
+    }
     wasmSim.stepTicks(count);
     currentState = wasmSim.getState();
     renderUI();
@@ -2408,6 +2916,188 @@ function renderProcessPipeline() {
   document.getElementById("proc-net-pwr").innerText = formatPowerAndAmps(pe.totalPowerEUt, false);
 }
 
+function setByproductUnit(unit) {
+  byproductUnit = unit;
+  const minBtn = document.getElementById("btn-byproduct-min");
+  const hourBtn = document.getElementById("btn-byproduct-hour");
+  if (minBtn) minBtn.classList.toggle("active", unit === "min");
+  if (hourBtn) hourBtn.classList.toggle("active", unit === "hour");
+  renderByproducts();
+}
+
+function toggleStopOnIncidents(checked) {
+  const lbl = document.getElementById("lbl-stop-incidents");
+  if (lbl) {
+    lbl.innerText = checked ? "(Enabled)" : "(Off)";
+    lbl.style.color = checked ? "var(--warning)" : "var(--text-muted)";
+    lbl.style.fontWeight = checked ? "600" : "normal";
+  }
+  if (isWasmMode && wasmSim) {
+    wasmSim.setStopOnIncidents(checked);
+    currentState = wasmSim.getState();
+    renderUI();
+    return;
+  }
+  fetch(`/api/set-params?stopOnIncidents=${checked}`);
+}
+
+function toggleAutoSupplyFuel(checked) {
+  const lblSupply = document.getElementById("lbl-auto-supply-fuel");
+  if (lblSupply) {
+    lblSupply.innerText = checked ? "(Enabled)" : "(Off)";
+    lblSupply.style.color = checked ? "#34d399" : "var(--text-muted)";
+    lblSupply.style.fontWeight = checked ? "600" : "normal";
+  }
+  const lblRefuel = document.getElementById("lbl-auto-refuel");
+  if (lblRefuel) {
+    lblRefuel.innerText = checked ? "Enabled" : "Disabled";
+    lblRefuel.style.color = checked ? "#34d399" : "var(--text-muted)";
+  }
+  const chkSupply = document.getElementById("chk-auto-supply-fuel");
+  const chkRefuel = document.getElementById("chk-auto-refuel");
+  if (chkSupply && chkSupply.checked !== checked) chkSupply.checked = checked;
+  if (chkRefuel && chkRefuel.checked !== checked) chkRefuel.checked = checked;
+
+  if (isWasmMode && wasmSim) {
+    wasmSim.setAutoSupplyFuel(checked);
+    currentState = wasmSim.getState();
+    renderUI();
+    return;
+  }
+  fetch(`/api/set-auto-refuel?enabled=${checked}`);
+}
+
+function toggleAutoReplaceFuel(checked) {
+  toggleAutoSupplyFuel(checked);
+}
+
+function renderByproducts() {
+  if (!currentState) return;
+  const bp = currentState.byproducts;
+  if (!bp) return;
+
+  const isHour = (byproductUnit === "hour");
+  const unitLabel = isHour ? "/h" : "/min";
+  const fluidUnitLabel = isHour ? "L/h" : "L/min";
+
+  const autoChk = document.getElementById("chk-auto-refuel");
+  const autoLbl = document.getElementById("lbl-auto-refuel");
+  if (autoChk && bp.autoReplaceFuel !== undefined && autoChk !== document.activeElement) {
+    autoChk.checked = bp.autoReplaceFuel;
+    if (autoLbl) {
+      autoLbl.innerText = bp.autoReplaceFuel ? "Enabled" : "Disabled";
+      autoLbl.style.color = bp.autoReplaceFuel ? "#34d399" : "var(--text-muted)";
+    }
+  }
+
+  const rateBadge = document.getElementById("byproduct-rate-badge");
+  if (rateBadge) {
+    const totalSolidRate = isHour ? bp.totalSolidItemsPerHour : bp.totalSolidItemsPerMin;
+    rateBadge.innerText = `${(totalSolidRate || 0).toFixed(isHour ? 1 : 2)} items ${unitLabel}`;
+  }
+
+  const solidTotalEl = document.getElementById("byproduct-solid-total");
+  const solidListEl = document.getElementById("byproduct-solid-list");
+  if (solidTotalEl && solidListEl) {
+    const totalSolidRate = isHour ? bp.totalSolidItemsPerHour : bp.totalSolidItemsPerMin;
+    solidTotalEl.innerText = `${(totalSolidRate || 0).toFixed(isHour ? 1 : 2)} ${unitLabel}`;
+
+    if (!bp.solidRods || bp.solidRods.length === 0) {
+      solidListEl.innerHTML = `<div style="font-style:italic; color:#64748b; padding:2px 0;">No active fuel rods burning.</div>`;
+    } else {
+      let html = "";
+      bp.solidRods.forEach(s => {
+        const rate = isHour ? s.itemsPerHour : s.itemsPerMin;
+        const rateStr = `${rate.toFixed(isHour ? 1 : 2)} ${unitLabel}`;
+        const lifespanStr = (s.avgLifespanMin && s.avgLifespanMin !== "Infinity" && !isNaN(s.avgLifespanMin))
+          ? ` · ~${parseFloat(s.avgLifespanMin).toFixed(1)}m lifespan`
+          : "";
+        html += `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; border-radius:4px; padding:4px 6px; font-size:0.72rem;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="badge" style="font-size:0.65rem; padding:1px 4px; color:#34d399; border-color:#059669;">${s.depletedCode}</span>
+              <span style="color:#e2e8f0; font-weight:500;">${s.depletedName}</span>
+              <span style="color:var(--text-muted); font-size:0.68rem;">(${s.activeRods} rod${s.activeRods === 1 ? "" : "s"}${lifespanStr})</span>
+            </div>
+            <div style="text-align:right;">
+              <span style="color:#4ade80; font-weight:600;">${rateStr}</span>
+              ${s.totalProduced > 0 ? `<div style="font-size:0.65rem; color:var(--text-muted);">${s.totalProduced.toLocaleString()} produced</div>` : ""}
+            </div>
+          </div>
+        `;
+      });
+      solidListEl.innerHTML = html;
+    }
+  }
+
+  const liquidSec = document.getElementById("byproduct-liquid-section");
+  const liquidTotalEl = document.getElementById("byproduct-liquid-total");
+  const liquidListEl = document.getElementById("byproduct-liquid-list");
+  if (liquidSec && liquidTotalEl && liquidListEl) {
+    if (!bp.liquidFuels || bp.liquidFuels.length === 0) {
+      liquidSec.style.display = "none";
+    } else {
+      liquidSec.style.display = "block";
+      const totalLiqRate = isHour ? bp.totalLiquidLitersPerHour : bp.totalLiquidLitersPerMin;
+      liquidTotalEl.innerText = `${Math.round(totalLiqRate || 0).toLocaleString()} ${fluidUnitLabel}`;
+
+      let html = "";
+      bp.liquidFuels.forEach(l => {
+        const rate = isHour ? l.litersPerHour : l.litersPerMin;
+        const rateStr = `${Math.round(rate).toLocaleString()} ${fluidUnitLabel}`;
+        html += `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; border-radius:4px; padding:4px 6px; font-size:0.72rem;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="badge" style="font-size:0.65rem; padding:1px 4px; color:#38bdf8; border-color:#0284c7;">FLUID</span>
+              <span style="color:#e2e8f0; font-weight:500;">${l.displayName}</span>
+              <span style="color:var(--text-muted); font-size:0.68rem;">(${l.activeHatches} hatch${l.activeHatches === 1 ? "" : "es"})</span>
+            </div>
+            <div style="text-align:right;">
+              <span style="color:#38bdf8; font-weight:600;">${rateStr}</span>
+              ${l.totalLiters > 0 ? `<div style="font-size:0.65rem; color:var(--text-muted);">${l.totalLiters.toLocaleString()} L total</div>` : ""}
+            </div>
+          </div>
+        `;
+      });
+      liquidListEl.innerHTML = html;
+    }
+  }
+
+  const isoSec = document.getElementById("byproduct-isotope-section");
+  const isoTotalEl = document.getElementById("byproduct-isotope-total");
+  const isoListEl = document.getElementById("byproduct-isotope-list");
+  if (isoSec && isoTotalEl && isoListEl) {
+    const hasIsotopes = bp.isotopes && bp.isotopes.some(iso => iso.totalLiters > 0 || iso.litersPerMin > 0);
+    if (!hasIsotopes) {
+      isoSec.style.display = "none";
+    } else {
+      isoSec.style.display = "block";
+      let totalIsoRate = 0;
+      let html = "";
+      bp.isotopes.forEach(iso => {
+        const rate = isHour ? iso.litersPerHour : iso.litersPerMin;
+        totalIsoRate += rate;
+        const rateStr = `${rate.toFixed(isHour ? 1 : 2)} ${fluidUnitLabel}`;
+        const color = (iso.code === "T") ? "#d946ef" : "#38bdf8";
+        html += `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; border-radius:4px; padding:4px 6px; font-size:0.72rem;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="badge" style="font-size:0.65rem; padding:1px 4px; color:${color}; border-color:${color};">${iso.code}</span>
+              <span style="color:#e2e8f0; font-weight:500;">${iso.name}</span>
+            </div>
+            <div style="text-align:right;">
+              <span style="color:${color}; font-weight:600;">${rateStr}</span>
+              ${iso.totalLiters > 0 ? `<div style="font-size:0.65rem; color:var(--text-muted);">${iso.totalLiters.toLocaleString()} L total</div>` : ""}
+            </div>
+          </div>
+        `;
+      });
+      isoTotalEl.innerText = `${totalIsoRate.toFixed(isHour ? 1 : 2)} ${fluidUnitLabel}`;
+      isoListEl.innerHTML = html;
+    }
+  }
+}
+
 window.addEventListener("resize", () => {
   if (isFitMode) {
     recalculateFitZoom();
@@ -2458,7 +3148,7 @@ if (selX !== null && selY !== null) {
   selectedTilePos = { x: parseInt(selX), y: parseInt(selY) };
 }
 
-window.__INITIAL_STATE__ = {"width":7,"height":7,"pipeTier":1,"pipeTierName":"Platinum (Distilled Water)","coolingMode":"MODULAR","coolingModeName":"Modular (Per-Cell Cooling)","isTier2ConvectiveAllowed":true,"isCoolantLoopActive":false,"maxSafeTemp":1400.0,"currentTick":0,"isRunning":false,"exploded":false,"explosionReason":"","powerFailed":false,"powerFailReason":"","coreMaxTemp":20.00,"coreAvgTemp":20.00,"efficiency":1.000,"lastNeutrons":0,"fastAbsorbed":0,"thermalAbsorbed":0,"escapedNeutrons":0,"wallReflected":0,"wallAbsorbed":0,"wallHeatPool":0.0,"totalNeutrons":0,"totalSteam":0,"totalEU":0,"totalDeuterium":0,"totalTritium":0,"coolantLoop":{"material":"TITANIUM","materialName":"Titanium","materialTier":"EV","maxPressureBar":140.0,"maxTempC":4726.9,"pipeSize":"NORMAL","pipeSizeName":"Normal","fluid":"DISTILLED_WATER","fluidName":"Distilled Water","byproductGas":"Deuterium","pumpPowerEUt":2048.0,"targetFlowRateLPerSec":100.0,"useTargetFlowMode":false,"currentFlowRateLPerSec":0.0,"currentPressureBar":1.00,"currentCoolantTempCelsius":20.0,"lastHeatExtractedWatts":0.0,"lastHeatExtractedEUt":0.0,"lastSecondarySteamProducedLt":0.0,"lastSecondaryWaterBoiledLt":0.0,"lastPumpPowerEUt":0.0,"totalDeuteriumProduced":0,"totalTritiumProduced":0,"totalSecondarySteamProduced":0.0,"ruptured":false,"ruptureReason":"","attachedPoints":[],"allowedMaterials":[{"id":"STEEL","name":"Steel","maxPressure":35.0,"tier":"LV","progressionAppropriate":true},{"id":"STAINLESS_STEEL","name":"Stainless Steel","maxPressure":70.0,"tier":"MV","progressionAppropriate":true},{"id":"TITANIUM","name":"Titanium","maxPressure":140.0,"tier":"EV","progressionAppropriate":true},{"id":"TUNGSTENSTEEL","name":"Tungstensteel","maxPressure":280.0,"tier":"EV","progressionAppropriate":true},{"id":"NEUTRONIUM","name":"Neutronium","maxPressure":3000.0,"tier":"ZPM","progressionAppropriate":false}]},"grossPowerEUt":0.0,"pumpPowerEUt":0.0,"turbineMaterial":"HSS_S","turbineMaterialName":"HSS-S","turbineSize":"LARGE","turbineSizeName":"Large","turbineFitting":"TIGHT","turbineFittingName":"Tight Fitting (Max Efficiency)","flowRegularSteam":0.0,"flowSuperheatedSteam":0.0,"flowSupercriticalSteam":0.0,"flowHeavyWaterSteam":0.0,"flowHPHeavyWaterSteam":0.0,"flowHotCoolant":0.0,"flowDirectEU":0.0,"powerEstimate":{"totalPowerEUt":0.0,"directPowerEUt":0.0,"isLST":false,"lstPowerEUt":0.0,"xlstPowerEUt":0.0,"xlstHpPowerEUt":0.0,"xlstScPowerEUt":0.0,"coolantMachine":"None","coolantMachineMode":"Inactive","coolantSteamProduced":0.0,"coolantWaterConsumed":0.0,"coolantMachineCount":0,"eheMode":"Inactive","eheSteamProduced":0.0,"eheDistilledWaterConsumed":0.0,"lstTurbinesNeeded":0.00,"xlstTurbinesNeeded":0.00,"xlstHpTurbinesNeeded":0.00,"xlstScTurbinesNeeded":0.00,"totalTurbinesNeeded":0.00,"efficiency":1.000,"optFlowPerTurbine":0},"scenarios":{"tight":{"material":"ICHORIUM","materialName":"Ichorium","size":"LARGE","sizeName":"Large","mode":"TIGHT","efficiency":2.25,"description":"Large Ichorium (225%)","powerEUt":0.0,"totalTurbinesNeeded":0.00,"lstTurbinesNeeded":0.00,"xlstTurbinesNeeded":0.00,"xlstHpTurbinesNeeded":0.00,"xlstScTurbinesNeeded":0.00,"coolantMachine":"None","coolantMachineCount":0.0},"loose":{"material":"HSS_S","materialName":"HSS-S","size":"LARGE","sizeName":"Large","mode":"LOOSE","efficiency":1.23,"description":"Large HSS-S (123%)","powerEUt":0.0,"totalTurbinesNeeded":0.00,"lstTurbinesNeeded":0.00,"xlstTurbinesNeeded":0.00,"xlstHpTurbinesNeeded":0.00,"xlstScTurbinesNeeded":0.00,"coolantMachine":"None","coolantMachineCount":0.0},"turbineReductionRatio":1.00,"powerReductionRatio":1.00},"params":{"euPerDegree":32.0,"hatchCapacity":8000,"turnoverCurve":"SIGMOID","turnoverDeltaTMax":100.0,"turnoverExponent":1.00,"coolantFeedRate":999999,"coolingHeatPerLiter":5.0,"ambientTemp":20.0,"ic2CoolantHeatPerLiter":20.0,"tempThresholdLow":800.0,"tempThresholdHigh":3200.0,"reactivityPower":1.20,"thermalFissionMultiplier":1.00,"globalThermalFissionMultiplier":1.00,"fissionHeatPerNeutron":38.0,"hpWaterBoilingPoint":180.0},"tiles":[{"x":0,"y":0,"type":"NULL_WALL","name":"Reflective Wall","code":"NL","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":1,"y":0,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":2,"y":0,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":3,"y":0,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":4,"y":0,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":5,"y":0,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":6,"y":0,"type":"NULL_WALL","name":"Reflective Wall","code":"NL","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":0,"y":1,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":1,"y":1,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":2,"y":1,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":3,"y":1,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":4,"y":1,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":5,"y":1,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":6,"y":1,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":0,"y":2,"type":"FUEL_THORIUM_QUAD","name":"Thorium Quad","code":"T4","temp":20.0,"isFuel":true,"durability":50000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":1,"y":2,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":2,"y":2,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":3,"y":2,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":4,"y":2,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":5,"y":2,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":6,"y":2,"type":"FUEL_THORIUM_QUAD","name":"Thorium Quad","code":"T4","temp":20.0,"isFuel":true,"durability":50000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":0,"y":3,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":1,"y":3,"type":"FUEL_MOX_DUAL","name":"MOX Dual","code":"M2","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":2,"y":3,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":3,"y":3,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":4,"y":3,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":5,"y":3,"type":"FUEL_MOX_DUAL","name":"MOX Dual","code":"M2","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":6,"y":3,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":0,"y":4,"type":"FUEL_THORIUM_QUAD","name":"Thorium Quad","code":"T4","temp":20.0,"isFuel":true,"durability":50000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":1,"y":4,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":2,"y":4,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":3,"y":4,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":4,"y":4,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":5,"y":4,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":6,"y":4,"type":"FUEL_THORIUM_QUAD","name":"Thorium Quad","code":"T4","temp":20.0,"isFuel":true,"durability":50000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":0,"y":5,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":1,"y":5,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":2,"y":5,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":3,"y":5,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":4,"y":5,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":5,"y":5,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":6,"y":5,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":0,"y":6,"type":"NULL_WALL","name":"Reflective Wall","code":"NL","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":1,"y":6,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":2,"y":6,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":3,"y":6,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":4,"y":6,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":5,"y":6,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0},{"x":6,"y":6,"type":"NULL_WALL","name":"Reflective Wall","code":"NL","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0}],"history":[]};
+window.__INITIAL_STATE__ = {"width":7,"height":7,"pipeTier":1,"pipeTierName":"Platinum (Distilled Water)","coolingMode":"MODULAR","coolingModeName":"Modular (Per-Cell Cooling)","isTier2ConvectiveAllowed":true,"isCoolantLoopActive":false,"maxSafeTemp":1400.0,"currentTick":0,"isRunning":false,"exploded":false,"explosionReason":"","stopOnIncidents":false,"haltedByIncident":false,"lastHaltIncidentReason":"","autoSupplyFuel":true,"autoReplaceFuel":true,"powerFailed":false,"powerFailReason":"","strictMode":false,"lastIncidentTick":0,"incidentLog":[],"coreMaxTemp":20.00,"coreAvgTemp":20.00,"efficiency":1.000,"reactorDamage":0.0,"maintenanceIssues":0,"maintenanceEfficiency":1.000,"lastNeutrons":0,"fastAbsorbed":0,"thermalAbsorbed":0,"escapedNeutrons":0,"wallReflected":0,"wallAbsorbed":0,"wallHeatPool":0.0,"totalNeutrons":0,"totalSteam":0,"totalEU":0,"totalDeuterium":0,"totalTritium":0,"coolantLoop":{"material":"TITANIUM","materialName":"Titanium","materialTier":"EV","maxPressureBar":140.0,"maxTempC":4726.9,"pipeSize":"NORMAL","pipeSizeName":"Normal","fluid":"DISTILLED_WATER","fluidName":"Distilled Water","byproductGas":"Deuterium","hatchTier":"EV","hatchTierName":"EV","hatchVoltage":2048.0,"dutyCyclePercent":100.0,"effectiveDutyCyclePercent":100.0,"maxFlowRateLimit":0.0,"maxPressureLimit":0.0,"pressureLimited":false,"flowLimited":false,"limitReason":"","pumpPowerEUt":2048.0,"targetFlowRateLPerSec":100.0,"useTargetFlowMode":false,"currentFlowRateLPerSec":0.0,"currentPressureBar":1.00,"currentCoolantTempCelsius":20.0,"lastHeatExtractedWatts":0.0,"lastHeatExtractedEUt":0.0,"lastSecondarySteamProducedLt":0.0,"lastSecondaryWaterBoiledLt":0.0,"lastPumpPowerEUt":0.0,"totalDeuteriumProduced":0,"totalTritiumProduced":0,"totalSecondarySteamProduced":0.0,"ruptured":false,"ruptureReason":"","attachedPoints":[],"energyHatchTiers":[{"id":"LV","name":"LV","voltage":32.0},{"id":"MV","name":"MV","voltage":128.0},{"id":"HV","name":"HV","voltage":512.0},{"id":"EV","name":"EV","voltage":2048.0},{"id":"IV","name":"IV","voltage":8192.0},{"id":"LUV","name":"LuV","voltage":32768.0},{"id":"ZPM","name":"ZPM","voltage":131072.0},{"id":"UV","name":"UV","voltage":524288.0},{"id":"UHV","name":"UHV","voltage":2097152.0}],"allowedMaterials":[{"id":"STEEL","name":"Steel","maxPressure":35.0,"tier":"LV","progressionAppropriate":true},{"id":"STAINLESS_STEEL","name":"Stainless Steel","maxPressure":70.0,"tier":"MV","progressionAppropriate":true},{"id":"TITANIUM","name":"Titanium","maxPressure":140.0,"tier":"EV","progressionAppropriate":true},{"id":"TUNGSTENSTEEL","name":"Tungstensteel","maxPressure":280.0,"tier":"EV","progressionAppropriate":true},{"id":"NEUTRONIUM","name":"Neutronium","maxPressure":3000.0,"tier":"ZPM","progressionAppropriate":false}]},"grossPowerEUt":0.0,"pumpPowerEUt":0.0,"turbineMaterial":"HSS_S","turbineMaterialName":"HSS-S","turbineSize":"LARGE","turbineSizeName":"Large","turbineFitting":"TIGHT","turbineFittingName":"Tight Fitting (Max Efficiency)","flowRegularSteam":0.0,"flowSuperheatedSteam":0.0,"flowSupercriticalSteam":0.0,"flowHeavyWaterSteam":0.0,"flowHPHeavyWaterSteam":0.0,"flowHotCoolant":0.0,"flowDirectEU":0.0,"powerEstimate":{"totalPowerEUt":0.0,"directPowerEUt":0.0,"isLST":false,"lstPowerEUt":0.0,"xlstPowerEUt":0.0,"xlstHpPowerEUt":0.0,"xlstScPowerEUt":0.0,"coolantMachine":"None","coolantMachineMode":"Inactive","coolantSteamProduced":0.0,"coolantWaterConsumed":0.0,"coolantMachineCount":0,"eheMode":"Inactive","eheSteamProduced":0.0,"eheDistilledWaterConsumed":0.0,"lstTurbinesNeeded":0.00,"xlstTurbinesNeeded":0.00,"xlstHpTurbinesNeeded":0.00,"xlstScTurbinesNeeded":0.00,"totalTurbinesNeeded":0.00,"efficiency":1.000,"optFlowPerTurbine":0},"scenarios":{"tight":{"material":"ICHORIUM","materialName":"Ichorium","size":"LARGE","sizeName":"Large","mode":"TIGHT","efficiency":2.25,"description":"Large Ichorium (225%)","powerEUt":0.0,"totalTurbinesNeeded":0.00,"lstTurbinesNeeded":0.00,"xlstTurbinesNeeded":0.00,"xlstHpTurbinesNeeded":0.00,"xlstScTurbinesNeeded":0.00,"coolantMachine":"None","coolantMachineCount":0.0},"loose":{"material":"HSS_S","materialName":"HSS-S","size":"LARGE","sizeName":"Large","mode":"LOOSE","efficiency":1.23,"description":"Large HSS-S (123%)","powerEUt":0.0,"totalTurbinesNeeded":0.00,"lstTurbinesNeeded":0.00,"xlstTurbinesNeeded":0.00,"xlstHpTurbinesNeeded":0.00,"xlstScTurbinesNeeded":0.00,"coolantMachine":"None","coolantMachineCount":0.0},"turbineReductionRatio":1.00,"powerReductionRatio":1.00},"params":{"euPerDegree":32.0,"hatchCapacity":8000,"turnoverCurve":"SIGMOID","turnoverDeltaTMax":100.0,"turnoverExponent":1.00,"coolantFeedRate":999999,"coolingHeatPerLiter":5.0,"ambientTemp":20.0,"ic2CoolantHeatPerLiter":20.0,"tempThresholdLow":800.0,"tempThresholdHigh":3200.0,"reactivityPower":1.20,"thermalFissionMultiplier":1.00,"globalThermalFissionMultiplier":1.00,"fissionHeatPerNeutron":38.0,"hpWaterBoilingPoint":180.0,"baseHatchConductance":32.0},"tiles":[{"x":0,"y":0,"type":"NULL_WALL","name":"Reflective Wall","code":"NL","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":1,"y":0,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":2,"y":0,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":3,"y":0,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Quad","depletedCode":"DM4"},{"x":4,"y":0,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":5,"y":0,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":6,"y":0,"type":"NULL_WALL","name":"Reflective Wall","code":"NL","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":0,"y":1,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":1,"y":1,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Quad","depletedCode":"DM4"},{"x":2,"y":1,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":3,"y":1,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":4,"y":1,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":5,"y":1,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Quad","depletedCode":"DM4"},{"x":6,"y":1,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":0,"y":2,"type":"FUEL_THORIUM_QUAD","name":"Thorium Quad","code":"T4","temp":20.0,"isFuel":true,"durability":50000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Thorium Quad","depletedCode":"DT4"},{"x":1,"y":2,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":2,"y":2,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Quad","depletedCode":"DM4"},{"x":3,"y":2,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":4,"y":2,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Quad","depletedCode":"DM4"},{"x":5,"y":2,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":6,"y":2,"type":"FUEL_THORIUM_QUAD","name":"Thorium Quad","code":"T4","temp":20.0,"isFuel":true,"durability":50000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Thorium Quad","depletedCode":"DT4"},{"x":0,"y":3,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":1,"y":3,"type":"FUEL_MOX_DUAL","name":"MOX Dual","code":"M2","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Dual","depletedCode":"DM2"},{"x":2,"y":3,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":3,"y":3,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":4,"y":3,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":5,"y":3,"type":"FUEL_MOX_DUAL","name":"MOX Dual","code":"M2","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Dual","depletedCode":"DM2"},{"x":6,"y":3,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":0,"y":4,"type":"FUEL_THORIUM_QUAD","name":"Thorium Quad","code":"T4","temp":20.0,"isFuel":true,"durability":50000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Thorium Quad","depletedCode":"DT4"},{"x":1,"y":4,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":2,"y":4,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Quad","depletedCode":"DM4"},{"x":3,"y":4,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":4,"y":4,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Quad","depletedCode":"DM4"},{"x":5,"y":4,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":6,"y":4,"type":"FUEL_THORIUM_QUAD","name":"Thorium Quad","code":"T4","temp":20.0,"isFuel":true,"durability":50000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Thorium Quad","depletedCode":"DT4"},{"x":0,"y":5,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":1,"y":5,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Quad","depletedCode":"DM4"},{"x":2,"y":5,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":3,"y":5,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":4,"y":5,"type":"HATCH_DISTILLED_WATER","name":"Distilled Water Hatch","code":"HD","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"distilledwater","fluidAmount":8000,"fluidCapacity":16000,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":5,"y":5,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Quad","depletedCode":"DM4"},{"x":6,"y":5,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":0,"y":6,"type":"NULL_WALL","name":"Reflective Wall","code":"NL","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"},{"x":1,"y":6,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":2,"y":6,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":3,"y":6,"type":"FUEL_MOX_QUAD","name":"MOX Quad","code":"M4","temp":20.0,"isFuel":true,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted MOX Quad","depletedCode":"DM4"},{"x":4,"y":6,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":5,"y":6,"type":"FUEL_URANIUM_QUAD","name":"Uranium Quad","code":"U4","temp":20.0,"isFuel":true,"durability":20000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Uranium Quad","depletedCode":"DU4"},{"x":6,"y":6,"type":"NULL_WALL","name":"Reflective Wall","code":"NL","temp":20.0,"isFuel":false,"durability":10000,"durabilityPct":100.0,"fluidName":"","fluidAmount":0,"fluidCapacity":0,"wasDry":false,"lastProduced":0,"steamAmount":0,"fastFlux":0,"thermalFlux":0,"totalFlux":0,"fastAbsorbed":0,"thermalAbsorbed":0,"directEU":0,"isDepleted":false,"lastDurabilityLoss":0.00,"lastLiquidBurned":0,"depletedName":"Depleted Fuel","depletedCode":"DF"}],"history":[],"byproducts":{"autoReplaceFuel":true,"totalSolidItemsPerMin":0.00,"totalSolidItemsPerHour":0.0,"totalLiquidLitersPerMin":0.0,"totalLiquidLitersPerHour":0,"totalDepletedItemsProduced":0,"totalDepletedLiquidProduced":0,"solidRods":[{"type":"FUEL_URANIUM_QUAD","fuelName":"Uranium Quad","fuelCode":"U4","depletedName":"Depleted Uranium Quad","depletedCode":"DU4","activeRods":14,"itemsPerMin":0.00,"itemsPerHour":0.0,"totalProduced":0,"avgLifespanMin":"Infinity"},{"type":"FUEL_MOX_DUAL","fuelName":"MOX Dual","fuelCode":"M2","depletedName":"Depleted MOX Dual","depletedCode":"DM2","activeRods":2,"itemsPerMin":0.00,"itemsPerHour":0.0,"totalProduced":0,"avgLifespanMin":"Infinity"},{"type":"FUEL_MOX_QUAD","fuelName":"MOX Quad","fuelCode":"M4","depletedName":"Depleted MOX Quad","depletedCode":"DM4","activeRods":10,"itemsPerMin":0.00,"itemsPerHour":0.0,"totalProduced":0,"avgLifespanMin":"Infinity"},{"type":"FUEL_THORIUM_QUAD","fuelName":"Thorium Quad","fuelCode":"T4","depletedName":"Depleted Thorium Quad","depletedCode":"DT4","activeRods":4,"itemsPerMin":0.00,"itemsPerHour":0.0,"totalProduced":0,"avgLifespanMin":"Infinity"}],"liquidFuels":[],"isotopes":[{"name":"Deuterium","code":"D","litersPerMin":0.00,"litersPerHour":0.0,"totalLiters":0},{"name":"Tritium","code":"T","litersPerMin":0.00,"litersPerHour":0.0,"totalLiters":0}]}};
 if (window.__INITIAL_STATE__) {
   currentState = window.__INITIAL_STATE__;
   renderUI();
@@ -2470,14 +3160,7 @@ if (window.innerWidth <= 800) {
 
 initEngine().then((wasmLoaded) => {
   loadColorMaps();
-  if (wasmLoaded) {
-    if (isFitMode) recalculateFitZoom();
-  } else {
-    fetchState().then(() => {
-      if (isFitMode) recalculateFitZoom();
-      schedulePoll();
-    });
-  }
+  if (isFitMode) recalculateFitZoom();
 });
 </script>
 </body>
