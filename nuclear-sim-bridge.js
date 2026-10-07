@@ -129,6 +129,69 @@ class NuclearSimWasm {
         if (notify && this.onStateChange) this.onStateChange(this.getState());
     }
 
+    setCoolingMode(mode, notify = true) {
+        if (this.inst.exports.setCoolingMode) {
+            this.inst.exports.setCoolingMode(this.createJavaString(mode));
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setCoolantLoopMaterial(material, notify = true) {
+        if (this.inst.exports.setCoolantLoopMaterial) {
+            this.inst.exports.setCoolantLoopMaterial(this.createJavaString(material));
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setCoolantLoopPipeSize(pipeSize, notify = true) {
+        if (this.inst.exports.setCoolantLoopPipeSize) {
+            this.inst.exports.setCoolantLoopPipeSize(this.createJavaString(pipeSize));
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setCoolantLoopFluid(fluid, notify = true) {
+        if (this.inst.exports.setCoolantLoopFluid) {
+            this.inst.exports.setCoolantLoopFluid(this.createJavaString(fluid));
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setCoolantLoopPumpPower(powerEUt, notify = true) {
+        if (this.inst.exports.setCoolantLoopPumpPower) {
+            this.inst.exports.setCoolantLoopPumpPower(powerEUt);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    setCoolantLoopFlowRate(flowRateLPerSec, notify = true) {
+        if (this.inst.exports.setCoolantLoopFlowRate) {
+            this.inst.exports.setCoolantLoopFlowRate(flowRateLPerSec);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    attachCoolantLoopPoint(x, y, notify = true) {
+        if (this.inst.exports.attachCoolantLoopPoint) {
+            this.inst.exports.attachCoolantLoopPoint(x, y);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    detachCoolantLoopPoint(x, y, notify = true) {
+        if (this.inst.exports.detachCoolantLoopPoint) {
+            this.inst.exports.detachCoolantLoopPoint(x, y);
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
+    clearCoolantLoopPoints(notify = true) {
+        if (this.inst.exports.clearCoolantLoopPoints) {
+            this.inst.exports.clearCoolantLoopPoints();
+        }
+        if (notify && this.onStateChange) this.onStateChange(this.getState());
+    }
+
     setParam(key, value, notify = true) {
         this.inst.exports.setParam(
             this.createJavaString(key),
