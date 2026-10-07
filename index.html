@@ -899,9 +899,7 @@ const PALETTE = [
   { type: "FUEL_TIBERIUM", name: "Tiberium Quad", code: "TIB", color: "#14b8a6" },
   { type: "FUEL_CORE", name: "The Core (NQ32)", code: "NQ32", color: "#dc2626" },
   { type: "HATCH_DISTILLED_WATER", name: "Distilled Water Hatch", code: "HD", color: "#38bdf8" },
-  { type: "HATCH_HP_DISTILLED_WATER", name: "HP Distilled Water Hatch", code: "HP", color: "#0284c7" },
   { type: "HATCH_HEAVY_WATER", name: "Heavy Water Hatch", code: "HW", color: "#6366f1" },
-  { type: "HATCH_HP_HEAVY_WATER", name: "HP Heavy Water Hatch", code: "HH", color: "#4338ca" },
   { type: "HATCH_IC2_COOLANT", name: "IC2 Coolant Hatch", code: "HC", color: "#14b8a6" },
   { type: "PASSAGE_CORE", name: "Coolant Loop Passage", code: "CP", color: "#00d2ff" },
   { type: "REFLECTOR_BERYLLIUM", name: "Beryllium Reflector", code: "RB", color: "#94a3b8" },
@@ -2341,7 +2339,7 @@ function renderProcessPipeline() {
     stageSc.style.opacity = "1.0";
     document.getElementById("proc-sc-title").innerText = "⚡ Stage 2: XLST-SC (Supercritical Steam)";
     document.getElementById("proc-sc-pwr").innerText = formatPowerAndAmps(pe.xlstScPowerEUt, true);
-    const scFlow = Math.round((currentState.flowSupercriticalSteam || 0) + (currentState.flowHPHeavyWaterSteam || 0) + (isSC ? pe.coolantSteamProduced : 0));
+    const scFlow = Math.round((currentState.flowSupercriticalSteam || 0) + (isSC ? pe.coolantSteamProduced : 0));
     document.getElementById("proc-sc-detail").innerText = `${scFlow.toLocaleString()} L/t SC steam · ${pe.xlstScTurbinesNeeded.toFixed(2)} turbines (opt ${Math.round(pe.optFlowPerTurbine).toLocaleString()} L/t)`;
     document.getElementById("proc-sc-cascade").innerText = "Cascades 1:1 into Superheated Steam for Stage 3";
 
