@@ -1,0 +1,116 @@
+[
+  {
+    "tier": "EV",
+    "name": "Electrum 5x5 Power (EV)",
+    "peak_power_eut": 564696.0,
+    "direct_power_eut": 0.0,
+    "steam_power_eut": 564696.0,
+    "peak_amps": 275.73046875,
+    "overpower_pct": 459.55078125,
+    "longevity_mins": 58.54,
+    "peak_temp": 1163.66,
+    "turbine": [
+      "Oriharukon",
+      "NORMAL",
+      "TIGHT"
+    ],
+    "state": "IN_ESCAPE",
+    "local_maxima_count": 4,
+    "layout": "RB,HD,M4,HD,RB;U4,M4,M4,M4,U4;M4,HD,HD,HD,M4;U4,M4,M4,M4,U4;RB,HD,M4,HD,RB"
+  },
+  {
+    "tier": "IV",
+    "name": "Platinum 9x9 Breeder (IV)",
+    "peak_power_eut": 5081819.1,
+    "direct_power_eut": 0.0,
+    "steam_power_eut": 5081819.1,
+    "peak_amps": 620.3392456054687,
+    "overpower_pct": 1033.8987426757812,
+    "longevity_mins": 35.46,
+    "peak_temp": 1372.49,
+    "turbine": [
+      "Ichorium",
+      "LARGE",
+      "TIGHT"
+    ],
+    "state": "IN_ESCAPE",
+    "local_maxima_count": 4,
+    "layout": "RB,RB,HD,M4,HDP,M4,HD,RB,RB;RB,M4,HD,HDP,CP,HDP,HD,M4,RB;HDP,HD,M4,HP,HDP,HP,M4,HD,HDP;M4,M4,HC,M4,CP,M4,HC,M4,M4;G1,M4,CP,HC,U4,HC,CP,M4,G1;M4,M4,HC,M4,CP,M4,HC,M4,M4;HDP,HD,M4,HP,HDP,HP,M4,HD,HDP;RB,M4,HD,HDP,CP,HDP,HD,M4,RB;RB,RB,HD,M4,HDP,M4,HD,RB,RB"
+  },
+  {
+    "tier": "LuV",
+    "name": "Osmium 9x9 Superheated (LuV)",
+    "peak_power_eut": 9455802.0,
+    "direct_power_eut": 0.0,
+    "steam_power_eut": 9455802.0,
+    "peak_amps": 288.56817626953125,
+    "overpower_pct": 480.9469604492188,
+    "longevity_mins": 11.19,
+    "peak_temp": 1745.39,
+    "turbine": [
+      "Duranium",
+      "LARGE",
+      "TIGHT"
+    ],
+    "state": "IN_ESCAPE",
+    "local_maxima_count": 3,
+    "layout": "RB,RB,HDP,EXP,CP,EXP,HDP,RB,RB;RB,EXU,HD,EXP,EXP,EXP,HD,EXU,RB;HDP,HD,EXP,HD,HDP,HD,EXP,HD,HDP;EXP,EXP,CP,EXP,HC,EXP,CP,EXP,EXP;HD,CP,EXU,CP,CP,CP,EXU,CP,HD;EXP,EXP,CP,EXP,HC,EXP,CP,EXP,EXP;HDP,HD,EXP,HD,HDP,HD,EXP,HD,HDP;RB,EXU,HD,EXP,EXP,EXP,HD,EXU,RB;RB,RB,HDP,EXP,CP,EXP,HDP,RB,RB"
+  },
+  {
+    "tier": "ZPM",
+    "name": "Quantium 13x13 CANDU (ZPM)",
+    "peak_power_eut": 51852211.1,
+    "direct_power_eut": 0.0,
+    "steam_power_eut": 51852211.1,
+    "peak_amps": 395.60097579956056,
+    "overpower_pct": 659.3349596659342,
+    "longevity_mins": 15.36,
+    "peak_temp": 1947.65,
+    "turbine": [
+      "Duranium",
+      "HUGE",
+      "TIGHT"
+    ],
+    "state": "EXHAUSTED",
+    "local_maxima_count": 1,
+    "layout": "RB,RB,RB,HW,HW,U4,X1,U4,HW,HW,RB,RB,RB;RB,RB,HW,HW,EXP,NQ,HW,NQ,EXP,HW,HW,RB,RB;RB,HW,HW,EXU,HW,XA,HW,XA,HW,EXU,HW,HW,RB;HW,HDU,NQ,HW,TIB,HW,HW,HW,TIB,HW,NQ,HDU,HW;EXP,XA,HDP,NQ,HW,CP,HW,CP,HW,NQ,HDP,XA,EXP;EXP,U4,CP,HW,NQ,HW,NQ,HW,NQ,HW,CP,U4,EXP;CP,HW,NQ,M4,HW,NQ,XA,NQ,HW,M4,NQ,HW,CP;EXP,U4,CP,HW,NQ,HW,NQ,HW,NQ,HW,CP,U4,EXP;EXP,XA,HDP,NQ,HW,CP,HW,CP,HW,NQ,HDP,XA,EXP;HW,HDU,NQ,HW,TIB,HW,HW,HW,TIB,HW,NQ,HDU,HW;RB,HW,HW,EXU,HW,XA,HW,XA,HW,EXU,HW,HW,RB;RB,RB,HW,HW,EXP,NQ,HW,NQ,EXP,HW,HW,RB,RB;RB,RB,RB,HW,HW,U4,X1,U4,HW,HW,RB,RB,RB"
+  },
+  {
+    "tier": "UV",
+    "name": "Fluxed 13x13 Supercritical (UV)",
+    "peak_power_eut": 111812039.3,
+    "direct_power_eut": 2048.0,
+    "steam_power_eut": 111809991.3,
+    "peak_amps": 213.2645402908325,
+    "overpower_pct": 355.4409004847208,
+    "longevity_mins": 11.29,
+    "peak_temp": 2520.24,
+    "turbine": [
+      "Duranium",
+      "HUGE",
+      "TIGHT"
+    ],
+    "state": "IN_ESCAPE",
+    "local_maxima_count": 4,
+    "layout": "RB,RB,RB,VA,XC,HW,HH,HW,XC,VA,RB,RB,RB;RB,RB,EXU,HW,HW,NQR,HW,NQR,HW,HW,EXU,RB,RB;RB,HW,HW,NQR,CP,NQR,HH,NQR,CP,NQR,HW,HW,RB;M4,HW,NQR,HW,NQR,CP,NQR,CP,NQR,HW,NQR,HW,M4;HW,NQR,HW,NQR,HW,CP,NQR,CP,HW,NQR,HW,NQR,HW;TIB,HW,NQR,HW,HW,HW,RH,HW,HW,HW,NQR,HW,TIB;HW,NQR,HH,M4,NQ,HW,HW,HW,NQ,M4,HH,NQR,HW;TIB,HW,NQR,HW,HW,HW,RH,HW,HW,HW,NQR,HW,TIB;HW,NQR,HW,NQR,HW,CP,NQR,CP,HW,NQR,HW,NQR,HW;M4,HW,NQR,HW,NQR,CP,NQR,CP,NQR,HW,NQR,HW,M4;RB,HW,HW,NQR,CP,NQR,HH,NQR,CP,NQR,HW,HW,RB;RB,RB,EXU,HW,HW,NQR,HW,NQR,HW,HW,EXU,RB,RB;RB,RB,RB,VA,XC,HW,HH,HW,XC,VA,RB,RB,RB"
+  },
+  {
+    "tier": "UHV",
+    "name": "Black Plutonium 13x13 Peak (UHV)",
+    "peak_power_eut": 140705506.0,
+    "direct_power_eut": 2048.0,
+    "steam_power_eut": 140703458.0,
+    "peak_amps": 67.09361362457275,
+    "overpower_pct": 111.82268937428792,
+    "longevity_mins": 16.75,
+    "peak_temp": 3074.2,
+    "turbine": [
+      "Infinity",
+      "HUGE",
+      "LOOSE"
+    ],
+    "state": "EXHAUSTED",
+    "local_maxima_count": 3,
+    "layout": "RB,RB,RB,M2,CP,T4,T1,T4,CP,M2,RB,RB,RB;RB,RB,HW,CP,U4,HW,CP,HW,U4,CP,HW,RB,RB;RB,U1,HW,NQ32,HW,NQ32,CP,NQ32,HW,NQ32,HW,U1,RB;NQR,HW,NQR,CP,HW,HH,HW,HH,HW,CP,NQR,HW,NQR;NQ,CP,X1,HW,TIB,HW,T4,HW,TIB,HW,X1,CP,NQ;CP,NQ32,HW,NQR,HC,NQR,VA,NQR,HC,NQR,HW,NQ32,CP;HW,CP,RH,V1,HP,HW,HW,HW,HP,V1,RH,CP,HW;CP,NQ32,HW,NQR,HC,NQR,VA,NQR,HC,NQR,HW,NQ32,CP;NQ,CP,X1,HW,TIB,HW,T4,HW,TIB,HW,X1,CP,NQ;NQR,HW,NQR,CP,HW,HH,HW,HH,HW,CP,NQR,HW,NQR;RB,U1,HW,NQ32,HW,NQ32,CP,NQ32,HW,NQ32,HW,U1,RB;RB,RB,HW,CP,U4,HW,CP,HW,U4,CP,HW,RB,RB;RB,RB,RB,M2,CP,T4,T1,T4,CP,M2,RB,RB,RB"
+  }
+]
